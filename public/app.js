@@ -19,7 +19,7 @@ async function postPayload(payload) {
     }
 }
 
-document.getElementById('sendBtn').addEventListener('click', () => {
+document.getElementById('registerBtn').addEventListener('click', () => {
     const payload = {
         Personnummer: document.getElementById('personnummer').value,
         Kurskod: document.getElementById('kurskod').value,
@@ -27,11 +27,5 @@ document.getElementById('sendBtn').addEventListener('click', () => {
         Datum: document.getElementById('datum').value,
         Betyg: document.getElementById('betyg').value
     };
-    postPayload(payload);
-});
-
-document.getElementById('badBtn').addEventListener('click', () => {
-    // invalid: only personnummer provided
-    const payload = { Personnummer: document.getElementById('personnummer').value };
     postPayload(payload);
 });

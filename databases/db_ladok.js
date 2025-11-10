@@ -1,6 +1,6 @@
 // ladok databas
 const Database = require('better-sqlite3');
-const http = require('http'); 
+const http = require('http');
 
 // Ansluter till databasfilen
 const db = new Database('databas-rest-ws.db');

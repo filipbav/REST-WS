@@ -4,6 +4,29 @@ function sendJson(res, statusCode, status) {
     res.end(JSON.stringify({ status }));
 }
 
+// Validation helpers
+function isValidPersonnummer(pnr) {
+    return /^\d{8}-\d{4}$/.test(pnr);
+}
+
+function isValidKurskod(kod) {
+    return /^[A-Z]\d{4}[A-Z]$/.test(kod);
+}
+
+function isValidModul(modul) {
+    return /^\d{4}$/.test(modul);
+}
+
+function isValidDatum(datum) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(datum)) return false;
+    const date = new Date(datum);
+    return !isNaN(date.getTime());
+}
+
+function isValidBetyg(betyg) {
+    return ['U', 'G', 'VG'].includes(betyg);
+}
+
 function handleRegResultat(req, res, dbLadok) {
     let body = '';
 
@@ -17,11 +40,19 @@ function handleRegResultat(req, res, dbLadok) {
             return sendJson(res, 400, 'hinder');
         }
 
+        // Check required fields exist
         const requiredFields = ['Personnummer', 'Kurskod', 'Modul', 'Datum', 'Betyg'];
         const missing = requiredFields.filter(f => !data[f]);
         if (missing.length > 0) {
             return sendJson(res, 400, 'hinder');
         }
+
+        // Validate field formats
+        if (!isValidPersonnummer(data.Personnummer)) return sendJson(res, 400, 'hinder');
+        if (!isValidKurskod(data.Kurskod)) return sendJson(res, 400, 'hinder');
+        if (!isValidModul(data.Modul)) return sendJson(res, 400, 'hinder');
+        if (!isValidDatum(data.Datum)) return sendJson(res, 400, 'hinder');
+        if (!isValidBetyg(data.Betyg)) return sendJson(res, 400, 'hinder');
 
         try {
             dbLadok.addResult(

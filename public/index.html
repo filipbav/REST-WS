@@ -10,11 +10,40 @@
   <body>
     <h1>Registrera Studieresultat</h1>
 
-    <label>Personnummer: <input id="personnummer" value="19900101-1234"></label><br>
-    <label>Kurskod:     <input id="kurskod"     value="KURS100"></label><br>
-    <label>Modul:       <input id="modul"       value="A"></label><br>
-    <label>Datum:       <input id="datum"       value="2025-11-10" type="date"></label><br>
-    <label>Betyg:       <input id="betyg"       value="VG"></label><br><br>
+    <label>Personnummer (YYYYMMDD-XXXX): 
+      <input id="personnummer" 
+             value="19900101-1234" 
+             pattern="\d{8}-\d{4}" 
+             title="Format: YYYYMMDD-XXXX t.ex. 19900101-1234">
+    </label><br>
+
+    <label>Kurskod (Letter + 4 digits + Letter): 
+      <input id="kurskod" 
+             value="D0031N" 
+             pattern="[A-Z]\d{4}[A-Z]" 
+             title="Format: Letter + 4 digits + Letter t.ex. D0031N">
+    </label><br>
+
+    <label>Modul (4 siffror): 
+      <input id="modul" 
+             value="0001" 
+             pattern="\d{4}" 
+             title="Exakt 4 siffror t.ex. 0001">
+    </label><br>
+
+    <label>Datum (YYYY-MM-DD): 
+      <input id="datum" 
+             value="2025-11-10" 
+             type="date">
+    </label><br>
+
+    <label>Betyg (U/G/VG): 
+      <select id="betyg">
+        <option value="U">U</option>
+        <option value="G">G</option>
+        <option value="VG" selected>VG</option>
+      </select>
+    </label><br><br>
 
     <button id="sendBtn">Send</button>
     <button id="badBtn">Send invalid</button>

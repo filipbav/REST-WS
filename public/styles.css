@@ -1,1 +1,10 @@
-/* Denna kan tas bort om vi använder tailwind till exempel. */
+body {
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 18px;
+  cursor: pointer;
+}

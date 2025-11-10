@@ -1,28 +1,40 @@
-//testdatabas by kim
-const Database = require('better-sqlite3');
+// hantering av server
 const http = require('http');
+const fs = require('fs');
+const path = require('path');
 
-const db = new Database('databas-rest-ws.db');
+const dbStudentITS = require('./databases/db_studentITS');
+const dbLadok = require('./databases/db_ladok');
+const dbEpok = require('./databases/db_epok');
+const dbCanvas = require('./databases/db_canvas');
 
-// skapa databas
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
-  )
-`).run();
+const publicDir = path.join(__dirname, 'public');
 
-// testdata
-db.prepare('INSERT INTO users (name) VALUES (?)').run('TestStudent');
-
-// server localhost:3000
 const server = http.createServer((req, res) => {
-  const users = db.prepare('SELECT * FROM users').all();
-  res.writeHead(200, { 'Content-Type': 'application/json' });
-  res.end(JSON.stringify(users));
+
+    // API ROUTE EXAMPLE
+    if (req.url === "/api/testapi") {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ message: "Test API is working!" }));
+    }
+
+    // STATIC FILE HANDLING
+    let filePath = req.url === '/' 
+        ? path.join(publicDir, 'index.html')
+        : path.join(publicDir, req.url);
+
+    fs.readFile(filePath, (err, content) => {
+        if (err) {
+            res.writeHead(404);
+            return res.end('File not found');
+        }
+
+        res.writeHead(200);
+        res.end(content);
+    });
+
 });
 
-// startar servern
 server.listen(3000, () => {
-  console.log('Server running at http://localhost:3000/');
+    console.log('Server is running on http://localhost:3000');
 });

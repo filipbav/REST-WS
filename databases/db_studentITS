@@ -1,0 +1,25 @@
+//testdatabas flera
+const Database = require('better-sqlite3');
+const http = require('http');
+
+const db = new Database('databas-rest-ws.db');
+
+// skapa databas
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL
+  )
+`).run();
+
+// testdata
+db.prepare('INSERT INTO users (name) VALUES (?)').run('TestStudent');
+
+module.exports = {
+    getAllUsers() {
+        return db.prepare('SELECT * FROM users').all();
+    },
+    addUser(name) {
+        return db.prepare('INSERT INTO users (name) VALUES (?)').run(name);
+    }
+};

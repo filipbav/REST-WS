@@ -18,6 +18,7 @@
   "homepage": "https://github.com/filipbav/REST-WS#readme",
   "description": "",
   "dependencies": {
+    "better-sqlite3": "^12.4.1",
     "express": "^5.1.0"
   }
 }

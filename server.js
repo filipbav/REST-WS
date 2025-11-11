@@ -33,7 +33,7 @@ const server = http.createServer((req, res) => {
         return res.end('Method Not Allowed');
     }
 
-    // Minimal static file handling (no extra path sanitization per your request)
+    // STATIC FILE SERVING
     const filePath = pathname === '/' 
         ? path.join(publicDir, 'index.html')
         : path.join(publicDir, pathname);

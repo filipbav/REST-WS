@@ -2,7 +2,7 @@ function showResult(text) {
     document.getElementById('output').textContent = text;
 }
 
-async function postPayload(payload) {
+async function registerResultat(payload) {
     showResult('Sending...');
     try {
         const res = await fetch('/reg_Resultat', {
@@ -19,6 +19,7 @@ async function postPayload(payload) {
     }
 }
 
+// knapp för registrering av resultat
 document.getElementById('registerBtn').addEventListener('click', () => {
     const payload = {
         Personnummer: document.getElementById('personnummer').value,
@@ -27,5 +28,5 @@ document.getElementById('registerBtn').addEventListener('click', () => {
         Datum: document.getElementById('datum').value,
         Betyg: document.getElementById('betyg').value
     };
-    postPayload(payload);
+    registerResultat(payload);
 });

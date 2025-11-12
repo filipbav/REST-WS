@@ -27,51 +27,35 @@ function isValidBetyg(betyg) {
 
 // Hanterar registrering av resultat
 function handleRegResultat(req, res, dbLadok) {
-    let body = '';
+    const data = req.body;
 
-    req.on('data', chunk => { body += chunk.toString(); });
+    // Kollar att alla nödvändiga fält finns
+    const requiredFields = ['Personnummer', 'Kurskod', 'Modul', 'Datum', 'Betyg'];
+    const missing = requiredFields.filter(f => !data[f]);
+    if (missing.length > 0) {
+        return res.status(400).json({ status: 'hinder' });
+    }
 
-    req.on('end', () => {
-        
-        // Kollar att det är JSON format
-        let data;
-        try { 
-            data = JSON.parse(body); 
-        } catch (e) {
-            return sendJson(res, 400, 'hinder'); 
-        }
+    // Validerar formatet
+    if (!isValidPersonnummer(data.Personnummer)) return res.status(400).json({ status: 'hinder' });
+    if (!isValidKurskod(data.Kurskod)) return res.status(400).json({ status: 'hinder' });
+    if (!isValidModul(data.Modul)) return res.status(400).json({ status: 'hinder' });
+    if (!isValidDatum(data.Datum)) return res.status(400).json({ status: 'hinder' });
+    if (!isValidBetyg(data.Betyg)) return res.status(400).json({ status: 'hinder' });
 
-        // Kollar att alla nödvändiga fält finns
-        const requiredFields = ['Personnummer', 'Kurskod', 'Modul', 'Datum', 'Betyg'];
-        const missing = requiredFields.filter(f => !data[f]);
-        if (missing.length > 0) {
-            return sendJson(res, 400, 'hinder');
-        }
-
-        // Validerar formatet
-        if (!isValidPersonnummer(data.Personnummer)) return sendJson(res, 400, 'hinder');
-        if (!isValidKurskod(data.Kurskod)) return sendJson(res, 400, 'hinder');
-        if (!isValidModul(data.Modul)) return sendJson(res, 400, 'hinder');
-        if (!isValidDatum(data.Datum)) return sendJson(res, 400, 'hinder');
-        if (!isValidBetyg(data.Betyg)) return sendJson(res, 400, 'hinder');
-
-        // Försöker lägga till resultatet i databasen
-        try {
-            dbLadok.addResult(
-                data.Personnummer,
-                data.Kurskod,
-                data.Modul,
-                data.Datum,
-                data.Betyg
-            );
-
-            sendJson(res, 201, 'registrerad');
-        } catch (err) {
-            sendJson(res, 500, 'hinder');
-        }
-    });
-
-    req.on('error', () => sendJson(res, 400, 'hinder'));
+    // Försöker lägga till resultatet i databasen
+    try {
+        dbLadok.addResult(
+            data.Personnummer,
+            data.Kurskod,
+            data.Modul,
+            data.Datum,
+            data.Betyg
+        );
+        res.status(201).json({ status: 'registrerad' });
+    } catch (err) {
+        res.status(500).json({ status: 'hinder' });
+    }
 }
 
 module.exports = { handleRegResultat };

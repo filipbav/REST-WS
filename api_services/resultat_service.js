@@ -1,6 +1,6 @@
 // för ladok
 
-// Sänder JSON-svar
+// För JSON-svar
 function sendJson(res, statusCode, status) {
     res.writeHead(statusCode, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status }));
@@ -32,27 +32,30 @@ function handleRegResultat(req, res, dbLadok) {
     req.on('data', chunk => { body += chunk.toString(); });
 
     req.on('end', () => {
+        
+        // Kollar att det är JSON format
         let data;
-        try {
-            data = JSON.parse(body);
+        try { 
+            data = JSON.parse(body); 
         } catch (e) {
-            return sendJson(res, 400, 'hinder');
+            return sendJson(res, 400, 'hinder'); 
         }
 
-        // Alla fält måste finnas
+        // Kollar att alla nödvändiga fält finns
         const requiredFields = ['Personnummer', 'Kurskod', 'Modul', 'Datum', 'Betyg'];
         const missing = requiredFields.filter(f => !data[f]);
         if (missing.length > 0) {
             return sendJson(res, 400, 'hinder');
         }
 
-        // Kolla format
+        // Validerar formatet
         if (!isValidPersonnummer(data.Personnummer)) return sendJson(res, 400, 'hinder');
         if (!isValidKurskod(data.Kurskod)) return sendJson(res, 400, 'hinder');
         if (!isValidModul(data.Modul)) return sendJson(res, 400, 'hinder');
         if (!isValidDatum(data.Datum)) return sendJson(res, 400, 'hinder');
         if (!isValidBetyg(data.Betyg)) return sendJson(res, 400, 'hinder');
 
+        // Försöker lägga till resultatet i databasen
         try {
             dbLadok.addResult(
                 data.Personnummer,

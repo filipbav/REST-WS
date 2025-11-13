@@ -2,7 +2,10 @@
 
 // För JSON-svar
 function sendJson(res, statusCode, status) {
-    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+    res.writeHead(statusCode, {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*' // CORS header. Behövs egentligen inte eftersom vi kör från samma origin dvs samma port: Localhost:3000
+    });
     res.end(JSON.stringify({ status }));
 }
 

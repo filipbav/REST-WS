@@ -4,7 +4,7 @@
 function sendJson(res, statusCode, status) {
     res.writeHead(statusCode, {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*' // CORS header. Behövs egentligen inte eftersom vi kör från samma origin dvs samma port: Localhost:3000
+        'Access-Control-Allow-Origin': '*' 
     });
     res.end(JSON.stringify({ status }));
 }
@@ -35,30 +35,25 @@ function handleRegResultat(req, res, dbLadok) {
     req.on('data', chunk => { body += chunk.toString(); });
 
     req.on('end', () => {
-        
-        // Kollar att det är JSON format
         let data;
-        try { 
-            data = JSON.parse(body); 
+        try {
+            data = JSON.parse(body);
         } catch (e) {
-            return sendJson(res, 400, 'hinder'); 
+            return sendJson(res, 400, 'ogiltig_json');
         }
 
-        // Kollar att alla nödvändiga fält finns
         const requiredFields = ['Personnummer', 'Kurskod', 'Modul', 'Datum', 'Betyg'];
         const missing = requiredFields.filter(f => !data[f]);
         if (missing.length > 0) {
-            return sendJson(res, 400, 'hinder');
+            return sendJson(res, 400, 'saknar_falt');
         }
 
-        // Validerar formatet
-        if (!isValidPersonnummer(data.Personnummer)) return sendJson(res, 400, 'hinder');
-        if (!isValidKurskod(data.Kurskod)) return sendJson(res, 400, 'hinder');
-        if (!isValidModul(data.Modul)) return sendJson(res, 400, 'hinder');
-        if (!isValidDatum(data.Datum)) return sendJson(res, 400, 'hinder');
-        if (!isValidBetyg(data.Betyg)) return sendJson(res, 400, 'hinder');
+        if (!isValidPersonnummer(data.Personnummer)) return sendJson(res, 400, 'ogiltigt_personnummer');
+        if (!isValidKurskod(data.Kurskod)) return sendJson(res, 400, 'ogiltig_kurskod');
+        if (!isValidModul(data.Modul)) return sendJson(res, 400, 'ogiltig_modul');
+        if (!isValidDatum(data.Datum)) return sendJson(res, 400, 'ogiltigt_datum');
+        if (!isValidBetyg(data.Betyg)) return sendJson(res, 400, 'ogiltigt_betyg');
 
-        // Försöker lägga till resultatet i databasen
         try {
             dbLadok.addResult(
                 data.Personnummer,
@@ -67,14 +62,13 @@ function handleRegResultat(req, res, dbLadok) {
                 data.Datum,
                 data.Betyg
             );
-
             sendJson(res, 201, 'registrerad');
         } catch (err) {
-            sendJson(res, 500, 'hinder');
+            sendJson(res, 500, 'databasfel');
         }
     });
 
-    req.on('error', () => sendJson(res, 400, 'hinder'));
+    req.on('error', () => sendJson(res, 400, 'request_error'));
 }
 
 module.exports = { handleRegResultat };

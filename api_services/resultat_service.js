@@ -1,5 +1,7 @@
 // för ladok
 
+const dbLadok = require('../databases/db_ladok'); 
+
 // För JSON-svar
 function sendJson(res, statusCode, status) {
     res.writeHead(statusCode, {
@@ -29,7 +31,7 @@ function isValidBetyg(betyg) {
 }
 
 // Hanterar registrering av resultat
-function handleRegResultat(req, res, dbLadok) {
+function handleRegResultat(req, res) {
     let body = '';
 
     req.on('data', chunk => { body += chunk.toString(); });

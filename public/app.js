@@ -5,7 +5,7 @@ function showResult(text) {
 async function registerResultat(payload) {
     showResult('Sending...');
     try {
-        const res = await fetch('/reg_Resultat', {
+        const res = await fetch('/ladok/reg_resultat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

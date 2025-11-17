@@ -1,14 +1,45 @@
+const db = require('../databases/db_canvas');
+
+function sendJson(res, status, obj) {
+    res.writeHead(status, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(obj));
+}
+
 module.exports = {
-    getStudentBaseratInlamning(inlamningsid) {
-      return db.prepare(`
-        SELECT
-        s.studentid,
-        s.namn,
-        si.betyg,
-        si.inlamningsid
-        FROM student_inlamning si
-        JOIN student s ON s.studentid = si.studentid
-        WHERE si.inlamningsid = ?
-      `).all(inlamningsid);
+
+    // Hämta alla kurser
+    handleGetKurser(req, res) {
+        try {
+            const result = db.getAllKurser();
+            sendJson(res, 200, result);
+        } catch (err) {
+            console.error('handleGetKurser error:', err);
+            sendJson(res, 500, { error: 'Internal server error' });
+        }
+    },
+
+    // Hämta inlämningar för kurs
+    handleGetInlamningarKurs(req, res, kurskod) {
+        try {
+            if (!kurskod) return sendJson(res, 400, { error: 'Missing kurskod' });
+            const result = db.getInlamningarForKurs(kurskod);
+            sendJson(res, 200, result);
+        } catch (err) {
+            console.error('handleGetInlamningarKurs error:', err);
+            sendJson(res, 500, { error: 'Internal server error' });
+        }
+    },
+
+    // Hämta studenter + betyg för inlämning
+    handleGetResultat(req, res, inlamningsid) {
+        try {
+            if (!inlamningsid) return sendJson(res, 400, { error: 'Missing inlamningsid' });
+            const result = db.getStudentBaseratInlamning(inlamningsid);
+            sendJson(res, 200, result);
+        } catch (err) {
+            console.error('handleGetResultat error:', err);
+            sendJson(res, 500, { error: 'Internal server error' });
+        }
     }
+
 };

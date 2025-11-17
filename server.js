@@ -11,6 +11,8 @@ const dbCanvas = require('./databases/db_canvas');
 
 // importera tjänster
 const resultatService = require('./api_services/resultat_service');
+const canvasApi = require('./api_services/canvas_api');
+
 
 
 const publicDir = path.join(__dirname, 'public');
@@ -20,6 +22,32 @@ const server = http.createServer((req, res) => {
 
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
     const pathname = parsedUrl.pathname;
+
+    console.log(`${new Date().toISOString()} ${req.method} ${pathname}`); // logg
+
+
+
+// GET /canvas/kurser
+if (req.method === 'GET' && pathname === '/canvas/kurser') {
+    canvasApi.handleGetKurser(req, res);
+    return;
+}
+
+// GET /canvas/kurs/:kurskod/inlamningar
+if (req.method === 'GET' && pathname.startsWith('/canvas/kurs/')) {
+    const parts = pathname.split('/');
+    const kurskod = parts[3];
+    canvasApi.handleGetInlamningarKurs(req, res, kurskod);
+    return;
+}
+
+// GET /canvas/inlamning/:id
+if (req.method === 'GET' && pathname.startsWith('/canvas/inlamning/')) {
+    const parts = pathname.split('/');
+    const inlamningsid = parts[3];
+    canvasApi.handleGetResultat(req, res, inlamningsid);
+    return;
+}
 
     // Ladok tjänst: reg_Resultat (POST /reg_Resultat)
     if (req.method === 'POST' && pathname === URL_RESULTAT) {
@@ -51,7 +79,13 @@ const server = http.createServer((req, res) => {
         res.end(content);
     });
 
+
+
+
 });
+
+
+
 
 server.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');

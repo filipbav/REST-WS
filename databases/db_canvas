@@ -43,5 +43,35 @@ const studentExists = db.prepare("SELECT 1 FROM student WHERE namn = ?").get('Te
 if (!studentExists) {
     db.prepare('INSERT INTO student (namn) VALUES (?)').run('TestStudent');
 }
+const studentInlExists = db.prepare("SELECT 1 FROM student_inlamning WHERE studentid = ? AND inlamningsid = ?").get(1, 1);
+if (!studentInlExists) {
+    db.prepare('INSERT INTO student_inlamning (studentid, inlamningsid, betyg) VALUES (?, ?, ?)').run(1, 1, 'G');
+}
 
+module.exports = {
 
+    getAllKurser() {
+        return db.prepare(`SELECT kurskod, kursnamn FROM kurs`).all();
+    },
+
+    getInlamningarForKurs(kurskod) {
+        return db.prepare(`
+            SELECT inlamningsid, titel
+            FROM inlamning
+            WHERE kurskod = ?
+        `).all(kurskod);
+    },
+
+    getStudentBaseratInlamning(inlamningsid) {
+        return db.prepare(`
+            SELECT
+                s.studentid,
+                s.namn,
+                si.betyg,
+                si.inlamningsid
+            FROM student_inlamning si
+            JOIN student s ON s.studentid = si.studentid
+            WHERE si.inlamningsid = ?
+        `).all(inlamningsid);
+    }
+};

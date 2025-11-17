@@ -4,7 +4,7 @@ const Database = require('better-sqlite3');
 const http = require('http');
 
 // Ansluter till databasfilen
-const db = new Database('databas-rest-ws.db');
+const db = new Database('ladok-databas.db');
 
 // Skapa tabellen Resultat
 db.prepare(`

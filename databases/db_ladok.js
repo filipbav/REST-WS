@@ -18,6 +18,18 @@ db.prepare(`
     )
 `).run();
 
+// Lägg till mockdata om tabellen är tom
+const rowCount = db.prepare('SELECT COUNT(*) AS count FROM Resultat').get().count;
+if (rowCount === 0) {
+    const insert = db.prepare(`
+        INSERT INTO Resultat (Personnummer, Kurskod, Modul, Datum, Betyg)
+        VALUES (?, ?, ?, ?, ?)
+    `);
+    insert.run('19900101-1234', 'D0031N', '0005', '2022-01-19', 'G');
+    insert.run('19940613-2345', 'D0031N', '0001', '2022-01-19', 'VG');
+    insert.run('19880505-5678', 'D0012E', '0005', '2022-02-10', 'U');
+}
+
 
 module.exports = {
     // Lägg till nytt resultat

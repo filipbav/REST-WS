@@ -1,0 +1,14 @@
+module.exports = {
+    getStudentBaseratInlamning(inlamningsid) {
+      return db.prepare(`
+        SELECT
+        s.studentid,
+        s.namn,
+        si.betyg,
+        si.inlamningsid
+        FROM student_inlamning si
+        JOIN student s ON s.studentid = si.studentid
+        WHERE si.inlamningsid = ?
+      `).all(inlamningsid);
+    }
+};

@@ -2,25 +2,46 @@
 const Database = require('better-sqlite3');
 const http = require('http');
 
-const db = new Database('databas-rest-ws.db');
+const db = new Database('canvas-databas.db');
 
 // skapa databas
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
-  )
-`).run();
+db.exec(`
+  CREATE TABLE IF NOT EXISTS kurs (
+    kurskod TEXT PRIMARY KEY,
+    kursnamn TEXT
+  );
+  CREATE TABLE IF NOT EXISTS inlamning (
+    inlamningsid INTEGER PRIMARY KEY AUTOINCREMENT,
+    kurskod TEXT NOT NULL,
+    titel TEXT,
+    FOREIGN KEY (kurskod) REFERENCES kurs(kurskod)
+  );
+  CREATE TABLE IF NOT EXISTS student (
+    studentid INTEGER PRIMARY KEY AUTOINCREMENT,
+    namn TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS student_inlamning (
+    studentid INTEGER,
+    inlamningsid INTEGER,
+    betyg TEXT NOT NULL CHECK (betyg IN ('U', 'G')),
+    PRIMARY KEY (studentid, inlamningsid),
+    FOREIGN KEY (studentid) REFERENCES student(studentid),
+    FOREIGN KEY (inlamningsid) REFERENCES inlamning(inlamningsid)
+  );
+`);
 
 // testdata
-db.prepare('INSERT INTO users (name) VALUES (?)').run('TestStudent');
+const kursExists = db.prepare("SELECT 1 FROM kurs WHERE kurskod = ?").get('DB101');
+if (!kursExists) {
+    db.prepare('INSERT INTO kurs (kurskod, kursnamn) VALUES (?, ?)').run('DB101', 'Databasteknik 101');
+}
+const inlExists = db.prepare("SELECT 1 FROM inlamning WHERE kurskod = ?").get('DB101');
+if (!inlExists) {
+    db.prepare('INSERT INTO inlamning (kurskod, titel) VALUES (?, ?)').run('DB101', 'Inlämning 1');
+}
+const studentExists = db.prepare("SELECT 1 FROM student WHERE namn = ?").get('TestStudent');
+if (!studentExists) {
+    db.prepare('INSERT INTO student (namn) VALUES (?)').run('TestStudent');
+}
 
-module.exports = {
-    getAllUsers() {
-        return db.prepare('SELECT * FROM users').all();
-    },
-    addUser(name) {
-        return db.prepare('INSERT INTO users (name) VALUES (?)').run(name);
-    }
-};
 

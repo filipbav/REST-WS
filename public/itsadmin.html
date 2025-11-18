@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>ITS Admin – Studentregister</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { padding: 6px; margin: 4px 0; }
+    pre { background: #f3f3f3; padding: 10px; }
+  </style>
+</head>
+<body>
+
+  <h1>ITS Admin</h1>
+  <p>Hantera studenter i StudentITS-systemet.</p>
+
+  <hr>
+
+  <h3>Sök personnummer via username</h3>
+  <input id="usernameInput" placeholder="t.ex. sveedz-4">
+  <button id="searchBtn">Sök</button>
+
+  <pre id="resultArea">-- Resultat visas här --</pre>
+
+  <hr>
+
+  <h3>Visa alla studenter</h3>
+  <button id="loadAllBtn">Hämta studentlista</button>
+
+  <pre id="allStudentsArea">-- Studentlista visas här --</pre>
+
+  <hr>
+
+  <a href="/index.html">⬅ Tillbaka till Resultatsidan</a>
+
+  <script>
+    const resultArea = document.getElementById('resultArea');
+    const allStudentsArea = document.getElementById('allStudentsArea');
+    const usernameInput = document.getElementById('usernameInput');
+
+    // Sök via username
+    document.getElementById('searchBtn').addEventListener('click', async () => {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        resultArea.textContent = 'Fyll i ett username först.';
+        return;
+      }
+      const res = await fetch(`/studentits/get_persnummer?username=${encodeURIComponent(username)}`);
+      const data = await res.json();
+      resultArea.textContent = JSON.stringify(data, null, 2);
+    });
+
+    // Visa alla studenter
+    document.getElementById('loadAllBtn').addEventListener('click', async () => {
+      const res = await fetch('/itsadmin/studenter');
+      const data = await res.json();
+      allStudentsArea.textContent = JSON.stringify(data, null, 2);
+    });
+  </script>
+
+</body>
+</html>

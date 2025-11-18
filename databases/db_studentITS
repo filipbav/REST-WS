@@ -1,25 +1,53 @@
-//testdatabas flera
+// db_studentITS.js
 const Database = require('better-sqlite3');
-const http = require('http');
 
 const db = new Database('studentITS-databas.db');
 
-// skapa databas
+// Skapa tabell for StudentITS
 db.prepare(`
-  CREATE TABLE IF NOT EXISTS users (
+  CREATE TABLE IF NOT EXISTS studentITS (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL
+    username TEXT NOT NULL UNIQUE,
+    personnummer TEXT NOT NULL,
+    namn TEXT
   )
 `).run();
 
-// testdata
-db.prepare('INSERT INTO users (name) VALUES (?)').run('TestStudent');
+// Lite testdata om tabellen är tom
+const countRow = db.prepare('SELECT COUNT(*) AS c FROM studentITS').get();
+if (countRow.c === 0) {
+  const insert = db.prepare(
+    'INSERT INTO studentITS (username, personnummer, namn) VALUES (?, ?, ?)'
+  );
+
+  insert.run('sveedz-4', '19940613-2345', 'Test Student 1');
+  insert.run('karlk-3', '19921012-4321', 'Test Student 2');
+}
 
 module.exports = {
-    getAllUsers() {
-        return db.prepare('SELECT * FROM users').all();
-    },
-    addUser(name) {
-        return db.prepare('INSERT INTO users (name) VALUES (?)').run(name);
-    }
+  // Motsvarar get_Persnummer-tjansten: input username -> output personnummer
+  getPersnummerByUsername(username) {
+    return db
+      .prepare('SELECT personnummer FROM studentITS WHERE username = ?')
+      .get(username);
+  },
+
+  // Om man vill kunna hamta hela posten
+  getStudent(username) {
+    return db
+      .prepare('SELECT * FROM studentITS WHERE username = ?')
+      .get(username);
+  },
+
+  getAllStudents() {
+    return db.prepare('SELECT * FROM studentITS').all();
+  },
+
+  addStudent(username, personnummer, namn) {
+    return db
+      .prepare(
+        'INSERT INTO studentITS (username, personnummer, namn) VALUES (?, ?, ?)'
+      )
+      .run(username, personnummer, namn);
+  }
 };

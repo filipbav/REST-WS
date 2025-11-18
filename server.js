@@ -3,9 +3,13 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
+
+
 // importera tjänster
 const resultatService = require('./api_services/resultat_service');
 const canvasApi = require('./api_services/canvas_api');
+const studentitsService = require('./api_services/studentits_service'); // 👈 NY
+
 
 const publicDir = path.join(__dirname, 'public');
 
@@ -45,6 +49,20 @@ const server = http.createServer((req, res) => {
         resultatService.handleRegResultat(req, res);
         return;
     }
+        
+    // GET /studentits/get_persnummer?username=xxx
+    if (req.method === 'GET' && pathname === '/studentits/get_persnummer') {
+        const username = parsedUrl.searchParams.get('username');
+        studentitsService.handleGetPersnummer(req, res, username);
+        return;
+    }
+
+    // GET /itsadmin/studenter  (adminvy: lista alla studenter)
+    if (req.method === 'GET' && pathname === '/itsadmin/studenter') {
+        studentitsService.handleGetAllStudents(req, res);
+        return;
+    }
+
 
     // Only serve static files for GET requests
     if (req.method !== 'GET') {

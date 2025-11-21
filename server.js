@@ -8,7 +8,7 @@ const path = require('path');
 // importera tjänster
 const resultatService = require('./api_services/resultat_service');
 const canvasApi = require('./api_services/canvas_api');
-const studentitsService = require('./api_services/studentits_service'); // 👈 NY
+const studentitsService = require('./api_services/studentits_service'); 
 
 
 const publicDir = path.join(__dirname, 'public');
@@ -62,7 +62,6 @@ const server = http.createServer((req, res) => {
         studentitsService.handleGetAllStudents(req, res);
         return;
     }
-
 
     // Only serve static files for GET requests
     if (req.method !== 'GET') {

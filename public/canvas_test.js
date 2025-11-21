@@ -8,7 +8,7 @@ const btn = document.getElementById("testLoadResultat");
 
 
 
-// När användaren väljer en kurs -> hämta inlämningar
+// När användaren väljer en modul -> hämta inlämningar
 kursSelect.addEventListener("change", async () => {
     const kurskod = kursSelect.value;
 

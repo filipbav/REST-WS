@@ -14,6 +14,7 @@ db.exec(`
     inlamningsid INTEGER PRIMARY KEY AUTOINCREMENT,
     kurskod TEXT NOT NULL,
     titel TEXT,
+    modulkod TEXT,
     FOREIGN KEY (kurskod) REFERENCES kurs(kurskod)
   );
   CREATE TABLE IF NOT EXISTS student (
@@ -37,7 +38,7 @@ if (!kursExists) {
 }
 const inlExists = db.prepare("SELECT 1 FROM inlamning WHERE kurskod = ?").get('DB101');
 if (!inlExists) {
-    db.prepare('INSERT INTO inlamning (kurskod, titel) VALUES (?, ?)').run('DB101', 'Inlämning 1');
+    db.prepare('INSERT INTO inlamning (kurskod, titel, modulkod) VALUES (?, ?, ?)').run('DB101', 'Inlämning 1', '005');
 }
 const studentExists = db.prepare("SELECT 1 FROM student WHERE namn = ?").get('TestStudent');
 if (!studentExists) {
@@ -73,5 +74,15 @@ module.exports = {
             JOIN student s ON s.studentid = si.studentid
             WHERE si.inlamningsid = ?
         `).all(inlamningsid);
+    },
+
+    getInlamningarByModulkod(modulkod) {
+    return db.prepare(`
+        SELECT inlamningsid, titel
+        FROM inlamningar
+        WHERE modulkod = ?
+    `).all(modulkod);
     }
+
+
 };

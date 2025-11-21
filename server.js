@@ -23,12 +23,12 @@ const server = http.createServer((req, res) => {
     
     // EPOK tjänst: hämta moduler för kurskod
     if (req.method === 'GET' && pathname.startsWith('/epok/moduler/')) {
-    const parts = pathname.split('/');
-    const kurskod = parts[3]; // alltid först
+        const parts = pathname.split('/');
+        const kurskod = parts[3]; // alltid först
 
-    epok_api.handleGetModuler(req, res, kurskod);
-    return;
-}
+        epok_api.handleGetModuler(req, res, kurskod);
+        return;
+    }
 
     // GET /canvas/kurser
     if (req.method === 'GET' && pathname === '/canvas/kurser') {
@@ -41,6 +41,14 @@ const server = http.createServer((req, res) => {
         const parts = pathname.split('/');
         const kurskod = parts[3];
         canvasApi.handleGetInlamningarKurs(req, res, kurskod);
+        return;
+    }
+
+    // GET /canvas/modul/:modulkod/inlamningar
+    if (req.method === 'GET' && pathname.startsWith('/canvas/modul/')) {
+        const parts = pathname.split('/');
+        const modulkod = parts[3];
+        canvasApi.handleGetInlamningarModul(req, res, modulkod);
         return;
     }
 

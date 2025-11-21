@@ -1,6 +1,7 @@
 
 const kursSelect = document.getElementById("testKursDropdown");
 const modulSelect = document.getElementById("modulSelect");
+const inlamningSelect = document.getElementById("inlamningSelect");
 
 
 
@@ -39,6 +40,27 @@ async function loadModuler() {
         showResult('Fel vid hämtning av moduler: ' + (err.message || err));
     }
 }
+
+modulSelect.addEventListener("change", async () => {
+    const modulkod = modulSelect.value;
+
+    if (!modulkod) {
+        inlamningSelect.innerHTML = '<option>-- Välj modul först --</option>';
+        return;
+    }
+
+    const res = await fetch(`/canvas/modul/${modulkod}/inlamningar`);
+    const inlamningar = await res.json();
+
+    inlamningSelect.innerHTML = '<option value="">-- Välj inlämning --</option>';
+
+    inlamningar.forEach(i => {
+        const opt = document.createElement("option");
+        opt.value = i.inlamningsid;
+        opt.textContent = i.titel;
+        inlamningSelect.appendChild(opt);
+    });
+});
 
 async function registerResultat(payload) {
     showResult('Sending...');

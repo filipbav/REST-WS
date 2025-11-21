@@ -40,6 +40,18 @@ module.exports = {
             console.error('handleGetResultat error:', err);
             sendJson(res, 500, { error: 'Internal server error' });
         }
+    },
+
+    handleGetInlamningarModul(req, res, modulkod) {
+        try {
+            const list = db.getInlamningarByModulkod(modulkod);
+            res.writeHead(200, { "Content-Type": "application/json" });
+            res.end(JSON.stringify(list));
+        } catch (err) {
+            console.error("Canvas modul-inl error:", err);
+            res.writeHead(500);
+            res.end(JSON.stringify({ error: "Internal server error" }));
+        }
     }
 
 };

@@ -6,26 +6,6 @@ const inlamningSelect = document.getElementById("testInlamningDropdown");
 const output = document.getElementById("testOutput");
 const btn = document.getElementById("testLoadResultat");
 
-//  Hämta alla kurser vid sidladdning 
-async function loadKurser() {
-    try {
-        const res = await fetch("/canvas/kurser");
-        const kurser = await res.json();
-
-        kursSelect.innerHTML = '<option value="">-- Välj kurs --</option>';
-
-        kurser.forEach(k => {
-            const opt = document.createElement("option");
-            opt.value = k.kurskod;
-            opt.textContent = `${k.kurskod} – ${k.kursnamn}`;
-            kursSelect.appendChild(opt);
-        });
-    } catch (err) {
-        output.textContent = "Fel vid hämtning av kurser.";
-    }
-}
-
-loadKurser();
 
 
 // När användaren väljer en kurs -> hämta inlämningar

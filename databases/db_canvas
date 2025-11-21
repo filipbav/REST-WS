@@ -49,6 +49,8 @@ if (!studentInlExists) {
     db.prepare('INSERT INTO student_inlamning (studentid, inlamningsid, betyg) VALUES (?, ?, ?)').run(1, 1, 'G');
 }
 
+
+
 module.exports = {
 
     getAllKurser() {
@@ -79,10 +81,12 @@ module.exports = {
     getInlamningarByModulkod(modulkod) {
     return db.prepare(`
         SELECT inlamningsid, titel
-        FROM inlamningar
+        FROM inlamning
         WHERE modulkod = ?
     `).all(modulkod);
     }
 
 
 };
+console.log(db.prepare("SELECT * FROM inlamning").all());
+

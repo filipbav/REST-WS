@@ -1,0 +1,38 @@
+const canvasDB = require("../databases/db_canvas");
+const studentITS = require("../databases/db_studentITS");
+
+function sendJson(res, status, obj) {
+    res.writeHead(status, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(obj));
+}
+
+module.exports = {
+
+    handleGetStudentlista(req, res, inlamningsId) {
+        try {
+            const resultat = canvasDB.getStudentBaseratInlamning(inlamningsId);
+
+            console.log('DB rows for inlamningsId', inlamningsId, resultat); // <<--- lägg till för att inspektera fältnamn
+
+            const lista = resultat.map(row => {
+                // här använder vi STUDENTID direkt
+                const person = studentITS.getPersnummerByUsername(row.studentid);
+
+                return {
+                    namn: row.namn,
+                    personnummer: person?.personnummer || "saknas",
+                    canvasBetyg: row.betyg,
+                    examinationsdatum: row.examinationsdatum,
+                    ladokBetyg: null
+                };
+            });
+
+            return sendJson(res, 200, lista);
+
+        } catch (err) {
+            console.error("handleGetStudentlista error:", err);
+            return sendJson(res, 500, { error: "Serverfel" });
+        }
+    }
+
+};

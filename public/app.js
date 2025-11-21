@@ -2,6 +2,9 @@
 const kursSelect = document.getElementById("testKursDropdown");
 const modulSelect = document.getElementById("modulSelect");
 const inlamningSelect = document.getElementById("inlamningSelect");
+const studentTableBody = document.querySelector("#studentTable tbody");
+const ladokModulSelect = document.getElementById("ladokModulSelect");
+
 
 
 
@@ -11,30 +14,70 @@ function showResult(text) {
 }
 
 
-if (kursSelect)kursSelect.addEventListener("change", loadModuler);
-async function loadModuler() {
-    const kurskod = kursSelect ? kursSelect.value : '';
-    if (!modulSelect) return console.error('Element #modulSelect saknas i DOM');
 
-    if (!kurskod) {
-        modulSelect.innerHTML = '<option value="">-- Välj modul --</option>';
+inlamningSelect.addEventListener("change", async () => {
+    const id = inlamningSelect.value;
+
+    if (!id) {
+        studentTableBody.innerHTML = "";
         return;
     }
 
+    const res = await fetch(`/resultat/studentlista/${id}`);
+    const students = await res.json();
+
+    studentTableBody.innerHTML = ""; // rensa
+
+    students.forEach(s => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${s.namn}</td>
+            <td>${s.personnummer}</td>
+            <td>${s.canvasBetyg}</td>
+            <td>${s.examinationsdatum}</td>
+            <td>${s.canvasBetyg}</td>
+        `;
+
+        studentTableBody.appendChild(tr);
+    });
+});
+
+
+if (kursSelect)kursSelect.addEventListener("change", loadModuler);
+async function loadModuler() {
+    const kurskod = kursSelect ? kursSelect.value : '';
+    
+    if (!modulSelect || !ladokModulSelect) {
+        return console.error('Dropdown saknas');
+    }
+
+    // Töm båda menyerna
+    modulSelect.innerHTML = '<option value="">-- Välj modul --</option>';
+    ladokModulSelect.innerHTML = '<option value="">-- Välj Ladok-modul --</option>';
+
+    if (!kurskod) return;
+
     try {
         const res = await fetch(`/epok/moduler/${encodeURIComponent(kurskod)}`);
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const moduler = await res.json();
 
-        modulSelect.innerHTML = '<option value="">-- Välj modul --</option>';
         (moduler || []).forEach(m => {
+            // EPOK → modulSelect
             const opt = document.createElement("option");
             opt.value = m.modulkod;
             opt.textContent = `${m.modulkod} – ${m.benamning}`;
             modulSelect.appendChild(opt);
+
+            // EPOK → ladokModulSelect
+            const opt2 = document.createElement("option");
+            opt2.value = m.modulkod;
+            opt2.textContent = `${m.modulkod} – ${m.benamning}`;
+            ladokModulSelect.appendChild(opt2);
         });
+
     } catch (err) {
         console.error("Fel vid hämtning av moduler:", err);
         showResult('Fel vid hämtning av moduler: ' + (err.message || err));

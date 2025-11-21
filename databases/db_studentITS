@@ -22,6 +22,7 @@ if (countRow.c === 0) {
 
   insert.run('sveedz-4', '19940613-2345', 'Test Student 1');
   insert.run('karlk-3', '19921012-4321', 'Test Student 2');
+  insert.run('kn222bi', '19880613-2345', 'Test Student 1');
 }
 
 module.exports = {

@@ -10,6 +10,7 @@ const resultatService = require('./api_services/resultat_service');
 const canvasApi = require('./api_services/canvas_api');
 const studentitsService = require('./api_services/studentits_service'); 
 const epok_api = require("./api_services/epok_api");
+const studentResultat = require('./api_services/student_resultat');
 
 
 const publicDir = path.join(__dirname, 'public');
@@ -57,6 +58,13 @@ const server = http.createServer((req, res) => {
         const parts = pathname.split('/');
         const inlamningsid = parts[3];
         canvasApi.handleGetResultat(req, res, inlamningsid);
+        return;
+    }
+
+    if (req.method === "GET" && pathname.startsWith("/resultat/studentlista/")) {
+        const parts = pathname.split("/");
+        const inlamningId = parts[3];
+        studentResultat.handleGetStudentlista(req, res, inlamningId);
         return;
     }
 

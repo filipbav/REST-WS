@@ -1,23 +1,9 @@
 //testdatabas flera
-
-
 const Database = require('better-sqlite3');
 const http = require('http');
 const db = new Database('epok.db');
 
-
-
-
-
 // skapa databas
-
-
-
-
-
-
-
-
 db.prepare(`
 CREATE TABLE IF NOT EXISTS modul (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,29 +20,25 @@ CREATE TABLE IF NOT EXISTS modul (
 
 
 
-// Testdata (ta bort sen)
-
-
+// Testdata 
 const count = db.prepare("SELECT COUNT(*) AS c FROM modul").get().c;
 
 if (count === 0) {
     db.prepare(`
         INSERT INTO modul (kurskod, modulkod, benamning, tillstand)
-        VALUES ('DB101', '005', 'Inlämningsuppgift', 'Aktiv')
+        VALUES 
+        ('DB101', '005', 'Inlämningsuppgift', 'Aktiv'),
+        ('DB102', '006', 'Inlämningsuppgift', 'Aktiv'),
+        ('DB103', '007', 'Inlämningsuppgift', 'Aktiv'),
+        ('DB104', '008', 'Inlämningsuppgift', 'Aktiv')
+
+
     `).run();
     
-    db.prepare(`
-        INSERT INTO modul (kurskod, modulkod, benamning, tillstand)
-        VALUES ('D0031N', '006', 'Projekt', 'Aktiv')
-    `).run();
+
+
+
 }
-
-
-
-
-
-
-
 
 module.exports = {
    

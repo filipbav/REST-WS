@@ -1,3 +1,5 @@
+
+
 //testdatabas flera
 const Database = require('better-sqlite3');
 const http = require('http');
@@ -15,14 +17,15 @@ db.exec(`
     kurskod TEXT NOT NULL,
     titel TEXT,
     modulkod TEXT,
+    examinationsdatum TEXT,
     FOREIGN KEY (kurskod) REFERENCES kurs(kurskod)
   );
   CREATE TABLE IF NOT EXISTS student (
-    studentid INTEGER PRIMARY KEY AUTOINCREMENT,
+    studentid TEXT PRIMARY KEY,
     namn TEXT NOT NULL
   );
   CREATE TABLE IF NOT EXISTS student_inlamning (
-    studentid INTEGER,
+    studentid TEXT,
     inlamningsid INTEGER,
     betyg TEXT NOT NULL CHECK (betyg IN ('U', 'G')),
     PRIMARY KEY (studentid, inlamningsid),
@@ -31,23 +34,63 @@ db.exec(`
   );
 `);
 
-// testdata
-const kursExists = db.prepare("SELECT 1 FROM kurs WHERE kurskod = ?").get('DB101');
-if (!kursExists) {
-    db.prepare('INSERT INTO kurs (kurskod, kursnamn) VALUES (?, ?)').run('DB101', 'Databasteknik 101');
+//testdata kurs
+let count = db.prepare("SELECT COUNT(*) AS c FROM kurs").get().c;
+
+if (count === 0) {
+    db.prepare(`
+        INSERT INTO kurs (kurskod, kursnamn)
+        VALUES
+            ('DB101', 'Databasteknik 101'),
+            ('DB102', 'Databasteknik 102'),
+            ('DB103', 'Databasteknik 103'),
+            ('DB104', 'Databasteknik 104')
+    `).run();
 }
-const inlExists = db.prepare("SELECT 1 FROM inlamning WHERE kurskod = ?").get('DB101');
-if (!inlExists) {
-    db.prepare('INSERT INTO inlamning (kurskod, titel, modulkod) VALUES (?, ?, ?)').run('DB101', 'Inlämning 1', '005');
+
+
+//testdata inlamning
+count = db.prepare("SELECT COUNT(*) AS c FROM inlamning").get().c;
+if (count === 0) {
+    db.prepare(`
+        INSERT INTO inlamning (kurskod, titel, modulkod, examinationsdatum)
+        VALUES
+            ('DB101', 'Inlämning 1', '005', '2025-11-03'),
+            ('DB101', 'Inlämning 2', '005', '2025-12-01'),
+            ('DB102', 'Inlämning 1', '006', '2025-11-10'),
+            ('DB103', 'Inlämning 1', '007', '2025-11-17')
+    `).run();
 }
-const studentExists = db.prepare("SELECT 1 FROM student WHERE namn = ?").get('TestStudent');
-if (!studentExists) {
-    db.prepare('INSERT INTO student (namn) VALUES (?)').run('TestStudent');
+
+//testdata student
+count = db.prepare("SELECT COUNT(*) AS c FROM student").get().c;
+if (count === 0) {
+    db.prepare(`
+        INSERT INTO student (studentid, namn)
+        VALUES
+            ('sveedz-4', 'Leroy Jenkins'),
+            ('karlk-3', 'Karl Karlsson'),
+            ('kn222bi', 'Nisse Nilsson')
+    `).run();
 }
-const studentInlExists = db.prepare("SELECT 1 FROM student_inlamning WHERE studentid = ? AND inlamningsid = ?").get(1, 1);
-if (!studentInlExists) {
-    db.prepare('INSERT INTO student_inlamning (studentid, inlamningsid, betyg) VALUES (?, ?, ?)').run(1, 1, 'G');
+
+//testdata student_inlamning
+count = db.prepare("SELECT COUNT(*) AS c FROM student_inlamning").get().c;
+if (count === 0) {
+    db.prepare(`
+        INSERT INTO student_inlamning (studentid, inlamningsid, betyg)
+        VALUES
+            ('sveedz-4', 1, 'G'),
+            ('sveedz-4', 2, 'U'),
+            ('karlk-3', 1, 'G'),
+            ('karlk-3', 3, 'G'),
+            ('kn222bi', 4, 'U'),
+            ('kn222bi', 2, 'G'),
+            ('kn222bi', 3, 'G')
+    `).run();
 }
+
+
 
 
 
@@ -66,17 +109,19 @@ module.exports = {
     },
 
     getStudentBaseratInlamning(inlamningsid) {
-        return db.prepare(`
-            SELECT
-                s.studentid,
-                s.namn,
-                si.betyg,
-                si.inlamningsid
-            FROM student_inlamning si
-            JOIN student s ON s.studentid = si.studentid
-            WHERE si.inlamningsid = ?
-        `).all(inlamningsid);
-    },
+    return db.prepare(`
+        SELECT
+            s.studentid,
+            s.namn,
+            si.betyg,
+            si.inlamningsid,
+            i.examinationsdatum
+        FROM student_inlamning si
+        JOIN student s ON s.studentid = si.studentid
+        JOIN inlamning i ON i.inlamningsid = si.inlamningsid
+        WHERE si.inlamningsid = ?
+    `).all(inlamningsid);
+},
 
     getInlamningarByModulkod(modulkod) {
     return db.prepare(`
@@ -84,6 +129,14 @@ module.exports = {
         FROM inlamning
         WHERE modulkod = ?
     `).all(modulkod);
+    },
+
+    getUsernameByStudentId(id) {
+    return db.prepare(`
+        SELECT username
+        FROM student
+        WHERE studentid = ?
+    `).get(id);
     }
 
 

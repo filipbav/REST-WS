@@ -1,0 +1,15 @@
+const db = require("../databases/db_epok");
+
+module.exports = {
+    handleGetModuler(req, res, kurskod) {
+        try {
+            const moduler = db.getModulerByKurskod(kurskod);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(moduler));
+        } catch (err) {
+            console.error("Epok API error:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Internal server error" }));
+        }
+    }
+};

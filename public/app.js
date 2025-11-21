@@ -1,8 +1,43 @@
 
 const kursSelect = document.getElementById("testKursDropdown");
+const modulSelect = document.getElementById("modulSelect");
+
+
+
 
 function showResult(text) {
     document.getElementById('output').textContent = text;
+}
+
+
+if (kursSelect)kursSelect.addEventListener("change", loadModuler);
+async function loadModuler() {
+    const kurskod = kursSelect ? kursSelect.value : '';
+    if (!modulSelect) return console.error('Element #modulSelect saknas i DOM');
+
+    if (!kurskod) {
+        modulSelect.innerHTML = '<option value="">-- Välj modul --</option>';
+        return;
+    }
+
+    try {
+        const res = await fetch(`/epok/moduler/${encodeURIComponent(kurskod)}`);
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+        }
+        const moduler = await res.json();
+
+        modulSelect.innerHTML = '<option value="">-- Välj modul --</option>';
+        (moduler || []).forEach(m => {
+            const opt = document.createElement("option");
+            opt.value = m.modulkod;
+            opt.textContent = `${m.modulkod} – ${m.benamning}`;
+            modulSelect.appendChild(opt);
+        });
+    } catch (err) {
+        console.error("Fel vid hämtning av moduler:", err);
+        showResult('Fel vid hämtning av moduler: ' + (err.message || err));
+    }
 }
 
 async function registerResultat(payload) {

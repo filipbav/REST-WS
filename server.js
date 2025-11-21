@@ -9,6 +9,7 @@ const path = require('path');
 const resultatService = require('./api_services/resultat_service');
 const canvasApi = require('./api_services/canvas_api');
 const studentitsService = require('./api_services/studentits_service'); 
+const epok_api = require("./api_services/epok_api");
 
 
 const publicDir = path.join(__dirname, 'public');
@@ -18,6 +19,16 @@ const server = http.createServer((req, res) => {
     const pathname = parsedUrl.pathname;
 
     console.log(`${new Date().toISOString()} ${req.method} ${pathname}`); // logg
+
+    
+    // EPOK tjänst: hämta moduler för kurskod
+    if (req.method === 'GET' && pathname.startsWith('/epok/moduler/')) {
+    const parts = pathname.split('/');
+    const kurskod = parts[3]; // alltid först
+
+    epok_api.handleGetModuler(req, res, kurskod);
+    return;
+}
 
     // GET /canvas/kurser
     if (req.method === 'GET' && pathname === '/canvas/kurser') {

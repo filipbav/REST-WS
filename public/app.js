@@ -1,170 +1,318 @@
-
+// ===== DOM-referenser =====
 const kursSelect = document.getElementById("testKursDropdown");
 const modulSelect = document.getElementById("modulSelect");
 const inlamningSelect = document.getElementById("inlamningSelect");
-const studentTableBody = document.querySelector("#studentTable tbody");
 const ladokModulSelect = document.getElementById("ladokModulSelect");
+const studentTableBody = document.querySelector("#studentTable tbody");
+const registerFromTableBtn = document.getElementById("registerFromTableBtn");
+const output = document.getElementById("output");
 
-
-
-
-
+// ===== Hjalfunktioner =====
 function showResult(text) {
-    document.getElementById('output').textContent = text;
-}
-
-
-
-inlamningSelect.addEventListener("change", async () => {
-    const id = inlamningSelect.value;
-
-    if (!id) {
-        studentTableBody.innerHTML = "";
-        return;
-    }
-
-    const res = await fetch(`/resultat/studentlista/${id}`);
-    const students = await res.json();
-
-    studentTableBody.innerHTML = ""; // rensa
-
-    students.forEach(s => {
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-            <td>${s.namn}</td>
-            <td>${s.personnummer}</td>
-            <td>${s.canvasBetyg}</td>
-            <td>${s.examinationsdatum}</td>
-            <td>${s.canvasBetyg}</td>
-        `;
-
-        studentTableBody.appendChild(tr);
-    });
-});
-
-
-if (kursSelect)kursSelect.addEventListener("change", loadModuler);
-async function loadModuler() {
-    const kurskod = kursSelect ? kursSelect.value : '';
-    
-    if (!modulSelect || !ladokModulSelect) {
-        return console.error('Dropdown saknas');
-    }
-
-    // Töm båda menyerna
-    modulSelect.innerHTML = '<option value="">-- Välj modul --</option>';
-    ladokModulSelect.innerHTML = '<option value="">-- Välj Ladok-modul --</option>';
-
-    if (!kurskod) return;
-
-    try {
-        const res = await fetch(`/epok/moduler/${encodeURIComponent(kurskod)}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-        const moduler = await res.json();
-
-        (moduler || []).forEach(m => {
-            // EPOK → modulSelect
-            const opt = document.createElement("option");
-            opt.value = m.modulkod;
-            opt.textContent = `${m.modulkod} – ${m.benamning}`;
-            modulSelect.appendChild(opt);
-
-            // EPOK → ladokModulSelect
-            const opt2 = document.createElement("option");
-            opt2.value = m.modulkod;
-            opt2.textContent = `${m.modulkod} – ${m.benamning}`;
-            ladokModulSelect.appendChild(opt2);
-        });
-
-    } catch (err) {
-        console.error("Fel vid hämtning av moduler:", err);
-        showResult('Fel vid hämtning av moduler: ' + (err.message || err));
+    if (output) {
+        output.textContent = String(text);
+    } else {
+        console.log(text);
     }
 }
 
-modulSelect.addEventListener("change", async () => {
-    const modulkod = modulSelect.value;
-
-    if (!modulkod) {
-        inlamningSelect.innerHTML = '<option>-- Välj modul först --</option>';
-        return;
-    }
-
-    const res = await fetch(`/canvas/modul/${modulkod}/inlamningar`);
-    const inlamningar = await res.json();
-
-    inlamningSelect.innerHTML = '<option value="">-- Välj inlämning --</option>';
-
-    inlamningar.forEach(i => {
-        const opt = document.createElement("option");
-        opt.value = i.inlamningsid;
-        opt.textContent = i.titel;
-        inlamningSelect.appendChild(opt);
-    });
-});
-
-async function registerResultat(payload) {
-    showResult('Sending...');
-    try {
-        const res = await fetch('/ladok/reg_resultat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const text = await res.text();
-        let body;
-        try { body = JSON.parse(text); } catch { body = text; }
-        showResult(`HTTP ${res.status} — ${JSON.stringify(body)}`);
-    } catch (err) {
-        showResult('Network error: ' + (err && err.message ? err.message : err));
-    }
-}
-
+// ===== Ladda kurser (Canvas) =====
 async function loadKurser() {
+    if (!kursSelect) return;
+
     try {
         const res = await fetch("/canvas/kurser");
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
         const kurser = await res.json();
+        kursSelect.innerHTML = '<option value="">-- Valj kurs --</option>';
 
-        kursSelect.innerHTML = '<option value="">-- Välj kurs --</option>';
-
-        kurser.forEach(k => {
+        (kurser || []).forEach(k => {
             const opt = document.createElement("option");
             opt.value = k.kurskod;
             opt.textContent = `${k.kurskod} – ${k.kursnamn}`;
             kursSelect.appendChild(opt);
         });
     } catch (err) {
-        output.textContent = "Fel vid hämtning av kurser.";
+        console.error("Fel vid hamtning av kurser:", err);
+        showResult("Fel vid hamtning av kurser.");
     }
 }
 
-loadKurser();
+// ===== Ladda moduler (Epok) nar kurs valts =====
+async function loadModuler() {
+    if (!kursSelect || !modulSelect || !ladokModulSelect) return;
 
-//  Ladda studentresultat 
-btn.addEventListener("click", async () => {
-    const id = inlamningSelect.value;
+    // Rensa ev. gamla statusmeddelanden
+    showResult("");
 
-    if (!id) {
-        output.textContent = "Välj en inlämningsuppgift först!";
+    const kurskod = kursSelect.value;
+
+    // Tom listor vid byte av kurs
+    modulSelect.innerHTML = '<option value="">-- Valj modul --</option>';
+    ladokModulSelect.innerHTML = '<option value="">-- Valj Ladok-modul --</option>';
+
+    // Nollstall inlamning + tabell nar kurs byts
+    if (inlamningSelect) {
+        inlamningSelect.innerHTML = '<option value="">-- Valj modul forst --</option>';
+    }
+    if (studentTableBody) {
+        studentTableBody.innerHTML = "";
+    }
+
+    if (!kurskod) return;
+
+    try {
+        const res = await fetch(`/epok/moduler/${encodeURIComponent(kurskod)}`);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const moduler = await res.json();
+
+        (moduler || []).forEach(m => {
+            // Epok -> modulSelect
+            const opt = document.createElement("option");
+            opt.value = m.modulkod;
+            opt.textContent = `${m.modulkod} – ${m.benamning}`;
+            modulSelect.appendChild(opt);
+
+            // Epok -> ladokModulSelect
+            const opt2 = document.createElement("option");
+            opt2.value = m.modulkod;
+            opt2.textContent = `${m.modulkod} – ${m.benamning}`;
+            ladokModulSelect.appendChild(opt2);
+        });
+    } catch (err) {
+        console.error("Fel vid hamtning av moduler:", err);
+        showResult("Fel vid hamtning av moduler.");
+    }
+}
+
+// ===== Ladda inlamningar for vald modul (Canvas) =====
+async function loadInlamningarForModul() {
+    if (!modulSelect || !inlamningSelect) return;
+
+    // Rensa ev. gamla statusmeddelanden
+    showResult("");
+
+    const modulkod = modulSelect.value;
+
+    // Rensa tabell vid modulbyte
+    if (studentTableBody) {
+        studentTableBody.innerHTML = "";
+    }
+
+    if (!modulkod) {
+        inlamningSelect.innerHTML = '<option value="">-- Valj modul forst --</option>';
         return;
     }
 
-    const res = await fetch(`/canvas/inlamning/${id}`);
-    const resultat = await res.json();
+    try {
+        const res = await fetch(`/canvas/modul/${encodeURIComponent(modulkod)}/inlamningar`);
+        if (!res.ok) throw new Error("HTTP " + res.status);
 
-    output.textContent = JSON.stringify(resultat, null, 2);
-});
+        const inlamningar = await res.json();
 
-// knapp för registrering av resultat
-document.getElementById('registerBtn').addEventListener('click', () => {
-    const payload = {
-        Personnummer: document.getElementById('personnummer').value,
-        Kurskod: document.getElementById('kurskod').value,
-        Modul: document.getElementById('modul').value,
-        Datum: document.getElementById('datum').value,
-        Betyg: document.getElementById('betyg').value
-    };
-    registerResultat(payload);
+        inlamningSelect.innerHTML = '<option value="">-- Valj inlamning --</option>';
+
+        (inlamningar || []).forEach(i => {
+            const opt = document.createElement("option");
+            opt.value = i.inlamningsid;
+            opt.textContent = i.titel;
+            inlamningSelect.appendChild(opt);
+        });
+    } catch (err) {
+        console.error("Fel vid hamtning av inlamningar:", err);
+        showResult("Fel vid hamtning av inlamningar.");
+    }
+}
+
+// ===== Ladda studentlista for vald inlamning =====
+async function loadStudenterForInlamning() {
+    if (!inlamningSelect || !studentTableBody) return;
+
+    // Rensa ev. gamla statusmeddelanden
+    showResult("");
+
+    const id = inlamningSelect.value;
+
+    // Tom tabell om ingen inlamning vald
+    if (!id) {
+        studentTableBody.innerHTML = "";
+        return;
+    }
+
+    try {
+        const res = await fetch(`/resultat/studentlista/${encodeURIComponent(id)}`);
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const students = await res.json();
+
+        studentTableBody.innerHTML = ""; // rensa tabell
+
+        (students || []).forEach(s => {
+            const tr = document.createElement("tr");
+
+            // Spara data vi behover for Ladok
+            tr.dataset.personnummer = s.personnummer || "";
+            tr.dataset.datum = s.examinationsdatum || "";
+
+            // Det betyg som kommer fran Canvas
+            const canvasBetyg = s.canvasBetyg || "";
+
+            tr.innerHTML = `
+                <td><input type="checkbox" class="reg-check" checked></td>
+                <td>${s.namn || ""}</td>
+                <td>${s.personnummer || ""}</td>
+                <td>${canvasBetyg}</td>
+                <td>${s.examinationsdatum || ""}</td>
+                <td>
+                    <input 
+                        type="text" 
+                        class="ladok-betyg-input" 
+                        value="${canvasBetyg}" 
+                        style="width:60px;"
+                    >
+                </td>
+            `;
+
+            studentTableBody.appendChild(tr);
+        });
+
+        if (!students || students.length === 0) {
+            showResult("Inga studenter hittades for denna inlamning.");
+        } else {
+            showResult(`Laddade ${students.length} studenter.`);
+        }
+    } catch (err) {
+        console.error("Fel vid hamtning av studentlista:", err);
+        showResult("Fel vid hamtning av studentlista.");
+    }
+}
+
+// ===== Anropa Ladok-API pa din server =====
+async function registerResultat(payload) {
+    try {
+        const res = await fetch("/ladok/reg_resultat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        const text = await res.text();
+        let body;
+        try {
+            body = JSON.parse(text);
+        } catch {
+            body = text;
+        }
+
+        // Visa senaste svaret (kan skrivas over sedan i batch)
+        showResult(`Ladok-svar: HTTP ${res.status} — ${JSON.stringify(body)}`);
+
+        if (!res.ok) {
+            throw new Error("Ladok fel: " + res.status);
+        }
+
+        return body;
+    } catch (err) {
+        console.error("Natt gick fel vid anrop till /ladok/reg_resultat:", err);
+        showResult("Natt gick fel vid anrop till Ladok.");
+        throw err;
+    }
+}
+
+// ===== Registrera alla markerade studenter i tabellen =====
+async function registerFromTable() {
+    if (!kursSelect || !ladokModulSelect || !studentTableBody) return;
+
+    const kurskod = kursSelect.value;
+    const modul = ladokModulSelect.value;
+
+    if (!kurskod || !modul) {
+        showResult("Valj kurskod och Ladok-modul forst.");
+        return;
+    }
+
+    const rows = studentTableBody.querySelectorAll("tr");
+    if (rows.length === 0) {
+        showResult("Det finns inga studenter i tabellen.");
+        return;
+    }
+
+    let skickade = 0;
+    let fel = 0;
+
+    for (const tr of rows) {
+        const checkbox = tr.querySelector(".reg-check");
+        if (!checkbox || !checkbox.checked) continue;
+
+        const personnummer = tr.dataset.personnummer || "";
+        let datum = tr.dataset.datum || "";
+
+        const betygInput = tr.querySelector(".ladok-betyg-input");
+        const betyg = betygInput ? betygInput.value.trim() : "";
+
+        // Frontend-validering: tillat bara U, G, VG
+        const tillatnaBetyg = ["U", "G", "VG"];
+        if (!tillatnaBetyg.includes(betyg)) {
+            showResult(`Fel: "${betyg}" ar inte ett giltigt betyg. Endast U, G och VG ar tillatna.`);
+            fel++;
+            continue; // hoppa over denna student
+        }
+
+        if (!personnummer || !betyg) {
+            console.warn("Saknar personnummer eller betyg, hoppar over rad:", tr);
+            fel++;
+            continue;
+        }
+
+        // fallback om datum saknas
+        if (!datum) {
+            datum = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        }
+
+        const payload = {
+            Personnummer: personnummer,
+            Kurskod: kurskod,
+            Modul: modul,
+            Datum: datum,
+            Betyg: betyg
+        };
+
+        try {
+            await registerResultat(payload);
+            skickade++;
+        } catch (e) {
+            console.error("Fel vid registrering for", personnummer, e);
+            fel++;
+        }
+    }
+
+    showResult(`Fardig. Registrerade ${skickade} resultat, misslyckade: ${fel}.`);
+}
+
+// ===== Event-lyssnare =====
+if (kursSelect) {
+    kursSelect.addEventListener("change", loadModuler);
+}
+
+if (modulSelect) {
+    modulSelect.addEventListener("change", loadInlamningarForModul);
+}
+
+if (inlamningSelect) {
+    inlamningSelect.addEventListener("change", loadStudenterForInlamning);
+}
+
+if (registerFromTableBtn) {
+    registerFromTableBtn.addEventListener("click", () => {
+        registerFromTable().catch(err => {
+            console.error("Ovantat fel i registerFromTable:", err);
+        });
+    });
+}
+
+// ===== Init =====
+loadKurser().catch(err => {
+    console.error("Fel i loadKurser:", err);
 });

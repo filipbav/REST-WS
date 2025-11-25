@@ -16,11 +16,14 @@ function isValidPersonnummer(pnr) {
     return /^\d{8}-\d{4}$/.test(pnr);
 }
 function isValidKurskod(kod) {
-    return /^[A-Z]\d{4}[A-Z]$/.test(kod);
+    // Exempel som godkanns: D0031N, DB103, MA142, etc
+    return /^[A-Z]{1,3}\d{3,4}[A-Z]?$/.test(kod);
 }
 function isValidModul(modul) {
-    return /^\d{4}$/.test(modul);
+    // Tillat 3 eller 4 siffror, t.ex. 007 eller 0005
+    return /^\d{3,4}$/.test(modul);
 }
+
 function isValidDatum(datum) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(datum)) return false;
     const date = new Date(datum);

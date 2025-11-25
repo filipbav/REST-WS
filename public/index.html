@@ -89,6 +89,7 @@
 <table id="studentTable">
     <thead>
         <tr>
+            <th>✔</th>             <!-- ny kolumn -->
             <th>Namn</th>
             <th>Personnummer</th>
             <th>Betyg (Canvas)</th>
@@ -96,15 +97,19 @@
             <th>Ladok-betyg</th>
         </tr>
     </thead>
-    <tbody>
-        <!-- Data fylls in dynamiskt -->
-    </tbody>
+    <tbody></tbody>
 </table>
 
 
-<button id="registreraBetyg" style="padding:10px 20px; font-size:16px;">
-    Registrera betyg
+
+<button id="registerFromTableBtn" style="padding:10px 20px; font-size:16px;">
+    Registrera valda i Ladok
 </button>
+
+<pre id="output" style="background:#eee; padding:10px; margin-top:10px;"></pre>
+
+
+
 
 <script src="app.js"></script>
 

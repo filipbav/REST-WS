@@ -1,5 +1,5 @@
 // api_services/studentits_service.js
-const dbStudentITS = require('../databases/db_studentITS'); // anpassa path om ditt filnamn ar annat
+const dbStudentITS = require('../databases/db_studentITS'); 
 
 function sendJson(res, statusCode, body) {
     res.writeHead(statusCode, { 'Content-Type': 'application/json' });

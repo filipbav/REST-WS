@@ -12,7 +12,7 @@ module.exports = {
         try {
             const resultat = canvasDB.getStudentBaseratInlamning(inlamningsId);
 
-            console.log('DB rows for inlamningsId', inlamningsId, resultat); // <<--- lägg till för att inspektera fältnamn
+            console.log('DB rows for inlamningsId', inlamningsId, resultat); // inspektera fältnamn
 
             const lista = resultat.map(row => {
                 // här använder vi STUDENTID direkt

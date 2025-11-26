@@ -3,8 +3,6 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-
-
 // importera tjänster
 const resultatService = require('./api_services/resultat_service');
 const canvasApi = require('./api_services/canvas_api');
@@ -12,8 +10,7 @@ const studentitsService = require('./api_services/studentits_service');
 const epok_api = require("./api_services/epok_api");
 const studentResultat = require('./api_services/student_resultat');
 
-
-const publicDir = path.join(__dirname, 'public');
+const publicDir = path.join(__dirname, 'public'); // används av static file serving längst ner
 
 const server = http.createServer((req, res) => {
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
@@ -21,7 +18,6 @@ const server = http.createServer((req, res) => {
 
     console.log(`${new Date().toISOString()} ${req.method} ${pathname}`); // logg
 
-    
     // EPOK tjänst: hämta moduler för kurskod
     if (req.method === 'GET' && pathname.startsWith('/epok/moduler/')) {
         const parts = pathname.split('/');

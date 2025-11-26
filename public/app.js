@@ -1,4 +1,4 @@
-// ===== DOM-referenser =====
+// DOM-referenser
 const kursSelect = document.getElementById("testKursDropdown");
 const modulSelect = document.getElementById("modulSelect");
 const inlamningSelect = document.getElementById("inlamningSelect");
@@ -7,7 +7,7 @@ const studentTableBody = document.querySelector("#studentTable tbody");
 const registerFromTableBtn = document.getElementById("registerFromTableBtn");
 const output = document.getElementById("output");
 
-// ===== Hjalfunktioner =====
+// Hjälpfunktioner
 function showResult(text) {
     if (output) {
         output.textContent = String(text);
@@ -16,7 +16,7 @@ function showResult(text) {
     }
 }
 
-// ===== Ladda kurser (Canvas) =====
+// Ladda kurser (Canvas)
 async function loadKurser() {
     if (!kursSelect) return;
 
@@ -39,7 +39,7 @@ async function loadKurser() {
     }
 }
 
-// ===== Ladda moduler (Epok) nar kurs valts =====
+// Ladda moduler (Epok) nar kurs valts
 async function loadModuler() {
     if (!kursSelect || !modulSelect || !ladokModulSelect) return;
 
@@ -48,11 +48,11 @@ async function loadModuler() {
 
     const kurskod = kursSelect.value;
 
-    // Tom listor vid byte av kurs
+    // Töm listor vid byte av kurs
     modulSelect.innerHTML = '<option value="">-- Valj modul --</option>';
     ladokModulSelect.innerHTML = '<option value="">-- Valj Ladok-modul --</option>';
 
-    // Nollstall inlamning + tabell nar kurs byts
+    // Nollställ inlämning + tabell när kurs byts
     if (inlamningSelect) {
         inlamningSelect.innerHTML = '<option value="">-- Valj modul forst --</option>';
     }
@@ -87,7 +87,7 @@ async function loadModuler() {
     }
 }
 
-// ===== Ladda inlamningar for vald modul (Canvas) =====
+// Ladda inlamningar for vald modul (Canvas)
 async function loadInlamningarForModul() {
     if (!modulSelect || !inlamningSelect) return;
 
@@ -126,7 +126,7 @@ async function loadInlamningarForModul() {
     }
 }
 
-// ===== Ladda studentlista for vald inlamning =====
+// Ladda studentlista for vald inlamning 
 async function loadStudenterForInlamning() {
     if (!inlamningSelect || !studentTableBody) return;
 
@@ -189,7 +189,7 @@ async function loadStudenterForInlamning() {
     }
 }
 
-// ===== Anropa Ladok-API pa din server =====
+// Anropa Ladok-API på din server
 async function registerResultat(payload) {
     try {
         const res = await fetch("/ladok/reg_resultat", {
@@ -206,7 +206,7 @@ async function registerResultat(payload) {
             body = text;
         }
 
-        // Visa senaste svaret (kan skrivas over sedan i batch)
+        // Visa senaste svaret (kan skrivas över sedan i batch)
         showResult(`Ladok-svar: HTTP ${res.status} — ${JSON.stringify(body)}`);
 
         if (!res.ok) {
@@ -221,7 +221,7 @@ async function registerResultat(payload) {
     }
 }
 
-// ===== Registrera alla markerade studenter i tabellen =====
+// Registrera alla markerade studenter i tabellen
 async function registerFromTable() {
     if (!kursSelect || !ladokModulSelect || !studentTableBody) return;
 
@@ -252,7 +252,7 @@ async function registerFromTable() {
         const betygInput = tr.querySelector(".ladok-betyg-input");
         const betyg = betygInput ? betygInput.value.trim() : "";
 
-        // Frontend-validering: tillat bara U, G, VG
+        // Frontend-validering: tillåt bara U, G, VG
         const tillatnaBetyg = ["U", "G", "VG"];
         if (!tillatnaBetyg.includes(betyg)) {
             showResult(`Fel: "${betyg}" ar inte ett giltigt betyg. Endast U, G och VG ar tillatna.`);
@@ -312,7 +312,7 @@ if (registerFromTableBtn) {
     });
 }
 
-// ===== Init =====
+// Init
 loadKurser().catch(err => {
     console.error("Fel i loadKurser:", err);
 });

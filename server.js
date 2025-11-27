@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 // importera tjänster
-const resultatService = require('./api_services/resultat_service');
+const ladokApi = require('./api_services/ladok_api');
 const canvasApi = require('./api_services/canvas_api');
 const studentitsService = require('./api_services/studentits_service'); 
 const epok_api = require("./api_services/epok_api");
@@ -69,7 +69,7 @@ const server = http.createServer((req, res) => {
         req.method === 'POST' &&
         (pathname === '/ladok/reg_resultat' || pathname === '/ladok/reg_resultat/')
     ) {
-        resultatService.handleRegResultat(req, res);
+        ladokApi.handleRegResultat(req, res);
         return;
     }
         

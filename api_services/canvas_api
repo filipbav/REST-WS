@@ -1,10 +1,15 @@
+// laddar in canvas databas funktioner
 const db = require('../databases/db_canvas');
 
+
+// hjälpfunktion för att skicka JSON svar
 function sendJson(res, status, obj) {
     res.writeHead(status, { "Content-Type": "application/json" });
     res.end(JSON.stringify(obj));
 }
 
+
+// exporterade funktioner
 module.exports = {
 
     // Hämta alla kurser
@@ -42,6 +47,7 @@ module.exports = {
         }
     },
 
+    // Hämta inlämningar för modul
     handleGetInlamningarModul(req, res, modulkod) {
         try {
             if (!modulkod) return sendJson(res, 400, { error: 'Missing modulkod' });

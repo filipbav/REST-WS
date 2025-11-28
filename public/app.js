@@ -291,7 +291,7 @@ async function registerFromTable() {
     showResult(`Fardig. Registrerade ${skickade} resultat, misslyckade: ${fel}.`);
 }
 
-// ===== Event-lyssnare =====
+// eventlyssnare
 if (kursSelect) {
     kursSelect.addEventListener("change", loadModuler);
 }

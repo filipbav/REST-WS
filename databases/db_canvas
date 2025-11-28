@@ -1,12 +1,14 @@
 
 
-//testdatabas flera
+// importerar better-sqlite3
 const Database = require('better-sqlite3');
-const http = require('http');
 
+
+
+//skapar databasfilen
 const db = new Database('canvas-databas.db');
 
-// skapa databas
+// skapar tabellerna om de inte finns
 db.exec(`
   CREATE TABLE IF NOT EXISTS kurs (
     kurskod TEXT PRIMARY KEY,
@@ -93,7 +95,7 @@ if (count === 0) {
 
 
 
-
+//exporterade databasdunktioner
 module.exports = {
 
     getAllKurser() {
@@ -141,5 +143,6 @@ module.exports = {
 
 
 };
-console.log(db.prepare("SELECT * FROM inlamning").all());
+//debugging
+//console.log(db.prepare("SELECT * FROM inlamning").all());
 

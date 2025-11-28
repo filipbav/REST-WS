@@ -57,6 +57,7 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // GET /resultat/studentlista/:inlamningsId
     if (req.method === "GET" && pathname.startsWith("/resultat/studentlista/")) {
         const parts = pathname.split("/");
         const inlamningId = parts[3];
@@ -86,13 +87,13 @@ const server = http.createServer((req, res) => {
         return;
     }
 
-    // Only serve static files for GET requests
+    ///statisk filhantering
     if (req.method !== 'GET') {
         res.writeHead(405, { 'Content-Type': 'text/plain' });
         return res.end('Method Not Allowed');
     }
 
-    // STATIC FILE SERVING
+    // STATISK FILHANTERING
     const filePath = pathname === '/'
         ? path.join(publicDir, 'index.html')
         : path.join(publicDir, pathname);
@@ -103,7 +104,7 @@ const server = http.createServer((req, res) => {
             return res.end('File not found');
         }
 
-        // basic content-type for common files
+        // bestäm innehållstyp baserat på filändelse
         const ext = path.extname(filePath).toLowerCase();
         const contentType = ext === '.js' ? 'text/javascript' : ext === '.css' ? 'text/css' : 'text/html';
         res.writeHead(200, { 'Content-Type': contentType });

@@ -24,11 +24,13 @@ function isValidModul(modul) {
     return /^\d{3,4}$/.test(modul);
 }
 
+// Datum i formatet ÅÅÅÅ-MM-DD
 function isValidDatum(datum) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(datum)) return false;
     const date = new Date(datum);
     return !isNaN(date.getTime());
 }
+// Betyg: U, G, VG
 function isValidBetyg(betyg) {
     return ['U', 'G', 'VG'].includes(betyg);
 }
@@ -39,6 +41,7 @@ function handleRegResultat(req, res) {
 
     req.on('data', chunk => { body += chunk.toString(); });
 
+    
     req.on('end', () => {
         let data;
         try {
@@ -47,18 +50,21 @@ function handleRegResultat(req, res) {
             return sendJson(res, 400, 'ogiltig_json');
         }
 
+        // Kontrollera att alla obligatoriska fält finns med
         const requiredFields = ['Personnummer', 'Kurskod', 'Modul', 'Datum', 'Betyg'];
         const missing = requiredFields.filter(f => !data[f]);
         if (missing.length > 0) {
             return sendJson(res, 400, 'saknar_falt');
         }
 
+        // Validera varje fält
         if (!isValidPersonnummer(data.Personnummer)) return sendJson(res, 400, 'ogiltigt_personnummer');
         if (!isValidKurskod(data.Kurskod)) return sendJson(res, 400, 'ogiltig_kurskod');
         if (!isValidModul(data.Modul)) return sendJson(res, 400, 'ogiltig_modul');
         if (!isValidDatum(data.Datum)) return sendJson(res, 400, 'ogiltigt_datum');
         if (!isValidBetyg(data.Betyg)) return sendJson(res, 400, 'ogiltigt_betyg');
 
+        // Försök registrera resultatet i databasen
         try {
             dbLadok.addResult(
                 data.Personnummer,

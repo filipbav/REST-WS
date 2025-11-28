@@ -1,18 +1,27 @@
+//denna filen hanterar API-anrop relaterade till studentresultat där det 
+// hämtas från både Canvas och StudentITS databaser
+
+
+// beroenden
 const canvasDB = require("../databases/db_canvas");
 const studentITS = require("../databases/db_studentITS");
 
+// hjälpfunktion för att skicka JSON svar
 function sendJson(res, status, obj) {
     res.writeHead(status, { "Content-Type": "application/json" });
     res.end(JSON.stringify(obj));
 }
 
+
+// exporterade funktioner
 module.exports = {
 
     handleGetStudentlista(req, res, inlamningsId) {
         try {
             const resultat = canvasDB.getStudentBaseratInlamning(inlamningsId);
 
-            console.log('DB rows for inlamningsId', inlamningsId, resultat); // inspektera fältnamn
+            //debugging
+            //console.log('DB rows for inlamningsId', inlamningsId, resultat); 
 
             const lista = resultat.map(row => {
                 // här använder vi STUDENTID direkt
